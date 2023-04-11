@@ -12,6 +12,30 @@ const ctx = {
     }
 }
 
+$('#startDate').datetimepicker({
+    timepicker: false,
+    format: 'Y-m-d'
+});
+
+$('#endDate').datetimepicker({
+    timepicker: false,
+    format: 'Y-m-d'
+});
+
+$('#startTime').datetimepicker({
+    datepicker: false,
+    format: 'H:i'
+});
+
+$('#endTime').datetimepicker({
+    datepicker: false,
+    format: 'H:i'
+});
+
+$('#dateTime').datetimepicker({
+    format: 'Y-m-d H:i'
+});
+
 function clearFilter() {
     $("#filter")[0].reset();
     $.get(mealAjaxUrl, updateTableByData);
@@ -60,7 +84,7 @@ $(function () {
                 ]
             ],
             "createdRow": function (row, data, dataIndex) {
-                    $(row).attr("data-meal-excess", data.excess);
+                $(row).attr("data-meal-excess", data.excess);
             }
         })
     );
