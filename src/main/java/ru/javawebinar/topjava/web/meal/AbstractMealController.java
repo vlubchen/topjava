@@ -50,7 +50,7 @@ public abstract class AbstractMealController {
 
     public void update(Meal meal, int id) {
         int userId = SecurityUtil.authUserId();
-        log.info("update {} for meal {}", meal, userId);
+        log.info("update {} for user {}", meal, userId);
         assureIdConsistent(meal, id);
         service.update(meal, userId);
     }
