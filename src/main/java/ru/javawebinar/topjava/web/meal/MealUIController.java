@@ -1,9 +1,5 @@
 package ru.javawebinar.topjava.web.meal;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.Nullable;
@@ -19,10 +15,6 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "/profile/meals", produces = MediaType.APPLICATION_JSON_VALUE)
 public class MealUIController extends AbstractMealController {
-
-    @Autowired
-    private MessageSource messageSource;
-
     @Override
     @GetMapping
     public List<MealTo> getAll() {
@@ -45,15 +37,10 @@ public class MealUIController extends AbstractMealController {
     @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void createOrUpdate(@Valid Meal meal) {
-        try {
-            if (meal.isNew()) {
-                super.create(meal);
-            } else {
-                super.update(meal, meal.getId());
-            }
-        } catch (
-                DataIntegrityViolationException ex) {
-            throw new DataIntegrityViolationException(messageSource.getMessage("exception.duplicateDateTime", null, LocaleContextHolder.getLocale()));
+        if (meal.isNew()) {
+            super.create(meal);
+        } else {
+            super.update(meal, meal.getId());
         }
     }
 

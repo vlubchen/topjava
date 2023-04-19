@@ -2,6 +2,9 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,6 +29,10 @@ import static ru.javawebinar.topjava.util.exception.ErrorType.*;
 @RestControllerAdvice(annotations = RestController.class)
 @Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class ExceptionInfoHandler {
+    public static final String DUPLICATE_EMAIL_ERROR = "users_unique_email_idx";
+    public static final String DUPLICATE_DATETIME_ERROR = "meal_unique_user_datetime_idx";
+    @Autowired
+    private MessageSource messageSource;
     private static final Logger log = LoggerFactory.getLogger(ExceptionInfoHandler.class);
 
     //  http://stackoverflow.com/a/22358422/548473
@@ -38,6 +45,19 @@ public class ExceptionInfoHandler {
     @ResponseStatus(HttpStatus.CONFLICT)  // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ErrorInfo conflict(HttpServletRequest req, DataIntegrityViolationException e) {
+        String rootMessage = ValidationUtil.getRootCause(e).getMessage();
+        String messageCode = null;
+        if (rootMessage != null) {
+            if (rootMessage.toLowerCase().contains(DUPLICATE_EMAIL_ERROR)) {
+                messageCode = "exception.duplicateEmail";
+            } else if (rootMessage.toLowerCase().contains(DUPLICATE_DATETIME_ERROR)) {
+                messageCode = "exception.duplicateDateTime";
+            }
+            if (messageCode != null) {
+                return logAndGetErrorInfo(req, e, false, VALIDATION_ERROR,
+                        messageSource.getMessage(messageCode, null, LocaleContextHolder.getLocale()));
+            }
+        }
         return logAndGetErrorInfo(req, e, true, DATA_ERROR);
     }
 
@@ -72,6 +92,6 @@ public class ExceptionInfoHandler {
             log.warn("{} at request  {}: {}", errorType, req.getRequestURL(), rootCause.toString());
         }
         return new ErrorInfo(req.getRequestURL(), errorType,
-                details.length != 0 ? details : new String[]{rootCause.toString()});
+                details.length != 0 ? details : new String[]{ValidationUtil.getMessage(rootCause)});
     }
 }
